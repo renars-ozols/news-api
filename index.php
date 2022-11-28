@@ -1,7 +1,6 @@
 <?php declare(strict_types=1);
 
-use App\Controllers\NewsController;
-use App\Controllers\WeatherReportsController;
+use App\Controllers\ArticlesController;
 use App\Template;
 use Dotenv\Dotenv;
 
@@ -11,7 +10,7 @@ $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
 $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $route) {
-    $route->addRoute('GET', '/', [NewsController::class, 'index']);
+    $route->addRoute('GET', '/', [ArticlesController::class, 'index']);
 });
 
 // Fetch method and URI from somewhere

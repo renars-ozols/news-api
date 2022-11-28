@@ -7,7 +7,7 @@ use App\Models\Article;
 use App\Template;
 
 
-class NewsController
+class ArticlesController
 {
     public function index(): Template
     {
