@@ -3,11 +3,16 @@
 use App\Controllers\ArticlesController;
 use App\Template;
 use Dotenv\Dotenv;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
 
 require_once "vendor/autoload.php";
 
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
+
+$loader = new FilesystemLoader('views');
+$twig = new Environment($loader);
 
 $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $route) {
     $route->addRoute('GET', '/', [ArticlesController::class, 'index']);
@@ -41,7 +46,7 @@ switch ($routeInfo[0]) {
         $response = (new $controller)->{$method}();
 
         if ($response instanceof Template) {
-            echo $response->render();
+            echo $twig->render($response->getPath(), $response->getParams());
         }
         break;
 }
