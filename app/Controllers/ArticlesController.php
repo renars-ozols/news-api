@@ -12,6 +12,6 @@ class ArticlesController
     {
         $query = $_GET["search"] ?? "Latvia";
         $articles = (new IndexArticlesService())->execute($query);
-        return new Template('index.html.twig', ['articles' => $articles->get()]);
+        return new Template('articles.twig', ['articles' => $articles->get()]);
     }
 }

@@ -1,0 +1,33 @@
+{% extends "layout.twig" %}
+
+{% block title %}Articles{% endblock %}
+{% block content %}
+<div class="container-fluid text-center" style="background-image: url({{ '../pictures/background.jpg' }}); background-size: cover; background-repeat: no-repeat; background-position: center;">
+    <div class="d-flex" style="height: 400px">
+        <form action="" class="w-50 align-self-center mx-auto">
+            <div class="input-group">
+                <input type="text" name="search" class="form-control" placeholder="Search for articles..." aria-label="Recipient's username" aria-describedby="button-addon2">
+                <button class="btn btn-primary" type="submit">Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="container my-5">
+    {% for row in articles|batch(3) %}
+        <div class="row mt-5">
+            {% for article in row %}
+                <div class="col">
+                    <div class="card shadow">
+                        <img src="{{ article.image }}" class="card-img-top" alt="...">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ article.title }}</h5>
+                            <p class="card-text">{{ article.description }}</p>
+                            <a href="{{ article.url }}" target="_blank" class="btn btn-primary float-end">Go to source &#8594;</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
