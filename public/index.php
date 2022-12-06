@@ -6,9 +6,11 @@ use App\Controllers\ArticlesController;
 use App\Controllers\LoginController;
 use App\Controllers\LogoutController;
 use App\Controllers\RegisterController;
-use App\Database;
 use App\Redirect;
 use App\Template;
+use App\ViewVariables\AuthViewVariables;
+use App\ViewVariables\ErrorsViewVariables;
+use App\ViewVariables\ViewVariables;
 use Dotenv\Dotenv;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
@@ -20,7 +22,17 @@ $dotenv->load();
 
 $loader = new FilesystemLoader('../views');
 $twig = new Environment($loader);
-$twig->addGlobal('session', $_SESSION);
+//TODO: Can implement auto read from directory
+$viewVariables = [
+    AuthViewVariables::class,
+    ErrorsViewVariables::class
+];
+
+foreach ($viewVariables as $variable) {
+    /** @var ViewVariables $variable */
+    $variable = new $variable;
+    $twig->addGlobal($variable->getName(), $variable->getValue());
+}
 
 $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $route) {
     $route->addRoute('GET', '/', [ArticlesController::class, 'index']);
@@ -59,25 +71,12 @@ switch ($routeInfo[0]) {
         $response = (new $controller)->{$method}();
 
         if ($response instanceof Template) {
-            $userName = '';
-            if (isset($_SESSION['userId'])) {
-                $queryBuilder = (new Database())->getConnection()->createQueryBuilder();
-                $user = $queryBuilder
-                    ->select('name')
-                    ->from('users')
-                    ->where('id = ?')
-                    ->setParameter(0, $_SESSION['userId'])->fetchAssociative();
-                $userName = $user;
-
-            }
-            echo $twig->render($response->getPath(), array_merge($response->getParams(), ['user' => $userName]));
+            echo $twig->render($response->getPath(), $response->getParams());
+            unset($_SESSION['errors']);
         }
 
         if ($response instanceof Redirect) {
             header('Location: ' . $response->getUrl());
-            exit;
         }
         break;
 }
-
-unset($_SESSION['errors']);

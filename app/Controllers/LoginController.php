@@ -2,9 +2,11 @@
 
 namespace App\Controllers;
 
-use App\Database;
+use App\Authentication;
+use App\FormRequests\UserLoginFormRequest;
 use App\Redirect;
 use App\Template;
+use App\Validation;
 
 class LoginController
 {
@@ -13,22 +15,19 @@ class LoginController
         return new Template('/authentication/login.twig');
     }
 
-    public function login()
+    public function login(): Redirect
     {
-        $queryBuilder = (new Database())->getConnection()->createQueryBuilder();
-        $user = $queryBuilder
-            ->select('id', 'name', 'password')
-            ->from('users')
-            ->where('email = ?')
-            ->setParameter(0, $_POST['email'])->fetchAssociative();
-        if ($user) {
-            $validPassword = password_verify($_POST['password'], $user['password']);
-            if ($validPassword) {
-                $_SESSION['userId'] = $user['id'];
-                return new Redirect('/');
-            }
+        $validation = new Validation();
+        $validation->validateLoginForm(new UserLoginFormRequest(
+            $_POST['email'],
+            $_POST['password']
+        ));
+
+        if (count($_SESSION['errors']) >= 1) {
+            return new Redirect('/login');
         }
-        $_SESSION['errors'][] = 'wrong username or password';
-        return new Redirect('/login');
+
+        Authentication::loginByEmail($_POST['email']);
+        return new Redirect('/');
     }
 }

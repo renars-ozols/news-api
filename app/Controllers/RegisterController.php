@@ -2,11 +2,13 @@
 
 namespace App\Controllers;
 
-use App\Database;
+use App\Authentication;
+use App\FormRequests\UserRegistrationFormRequest;
 use App\Redirect;
 use App\Services\RegisterService;
 use App\Services\RegisterServiceRequest;
 use App\Template;
+use App\Validation;
 
 class RegisterController
 {
@@ -17,28 +19,26 @@ class RegisterController
 
     public function store(): Redirect
     {
-        if ($_POST['password'] !== $_POST['passwordConfirm']) {
-            $_SESSION['errors'][] = "passwords don't match!";
+        $validation = new Validation();
+        $validation->validateRegistrationForm(new UserRegistrationFormRequest(
+            $_POST['name'],
+            $_POST['email'],
+            $_POST['password'],
+            $_POST['passwordConfirm']
+        ));
+
+        if (count($_SESSION['errors']) >= 1) {
             return new Redirect('/register');
         }
-        $queryBuilder = (new Database())->getConnection()->createQueryBuilder();
-        $checkIfEmailExists = $queryBuilder
-            ->select('email')
-            ->from('users')
-            ->where('email = ?')
-            ->setParameter(0, $_POST['email'])
-            ->fetchAssociative();
 
-        if (!$checkIfEmailExists) {
-            $registerService = new RegisterService();
-            $registerService->execute(new RegisterServiceRequest(
-                $_POST['name'],
-                $_POST['email'],
-                $_POST['password']
-            ));
-            return new Redirect('/login');
-        }
-        $_SESSION['errors'][] = "this email is already taken!";
-        return new Redirect('/register');
+        $registerService = new RegisterService();
+        $registerService->execute(new RegisterServiceRequest(
+            $_POST['name'],
+            $_POST['email'],
+            $_POST['password']
+        ));
+
+        Authentication::loginByEmail($_POST['email']);
+        return new Redirect('/');
     }
 }

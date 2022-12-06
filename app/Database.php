@@ -7,23 +7,20 @@ use Doctrine\DBAL\DriverManager;
 
 class Database
 {
-    private Connection $connection;
+    private static ?Connection $connection = null;
 
-    public function __construct()
+    public static function getConnection(): Connection
     {
-        $connectionParams = [
-            'dbname' => $_ENV["DB_NAME"],
-            'user' => $_ENV["USER"],
-            'password' => $_ENV["PASSWORD"],
-            'host' => $_ENV["HOST"],
-            'driver' => 'pdo_mysql',
-        ];
-
-        $this->connection = DriverManager::getConnection($connectionParams);
-    }
-
-    public function getConnection(): Connection
-    {
-        return $this->connection;
+        if (self::$connection == null) {
+            $connectionParams = [
+                'dbname' => $_ENV["DB_NAME"],
+                'user' => $_ENV["USER"],
+                'password' => $_ENV["PASSWORD"],
+                'host' => $_ENV["HOST"],
+                'driver' => 'pdo_mysql',
+            ];
+            self::$connection = DriverManager::getConnection($connectionParams);
+        }
+        return self::$connection;
     }
 }
