@@ -6,7 +6,7 @@ use App\Authentication;
 use App\FormRequests\UserLoginFormRequest;
 use App\Redirect;
 use App\Template;
-use App\Validation;
+use App\Validation\Validation;
 
 class LoginController
 {
@@ -23,11 +23,12 @@ class LoginController
             $_POST['password']
         ));
 
-        if (count($_SESSION['errors']) >= 1) {
+        if (isset($_SESSION['errors']) && count($_SESSION['errors']) >= 1) {
             return new Redirect('/login');
         }
 
         Authentication::loginByEmail($_POST['email']);
+
         return new Redirect('/');
     }
 }

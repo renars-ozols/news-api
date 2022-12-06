@@ -5,6 +5,7 @@ session_start();
 use App\Controllers\ArticlesController;
 use App\Controllers\LoginController;
 use App\Controllers\LogoutController;
+use App\Controllers\ProfileController;
 use App\Controllers\RegisterController;
 use App\Redirect;
 use App\Template;
@@ -41,6 +42,11 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $rou
     $route->addRoute('GET', '/login', [LoginController::class, 'showForm']);
     $route->addRoute('POST', '/login', [LoginController::class, 'login']);
     $route->addRoute('GET', '/logout', [LogoutController::class, 'logout']);
+    $route->addGroup('/profile', function (FastRoute\RouteCollector $route) {
+        $route->addRoute('GET', '', [ProfileController::class, 'index']);
+        $route->addRoute('POST', '/updateCredentials', [ProfileController::class, 'updateCredentials']);
+        $route->addRoute('POST', '/updatePassword', [ProfileController::class, 'updatePassword']);
+    });
 });
 
 // Fetch method and URI from somewhere

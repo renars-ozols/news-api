@@ -8,7 +8,7 @@ use App\Redirect;
 use App\Services\RegisterService;
 use App\Services\RegisterServiceRequest;
 use App\Template;
-use App\Validation;
+use App\Validation\Validation;
 
 class RegisterController
 {
@@ -27,7 +27,7 @@ class RegisterController
             $_POST['passwordConfirm']
         ));
 
-        if (count($_SESSION['errors']) >= 1) {
+        if (isset($_SESSION['errors']) && count($_SESSION['errors']) >= 1) {
             return new Redirect('/register');
         }
 
@@ -39,6 +39,7 @@ class RegisterController
         ));
 
         Authentication::loginByEmail($_POST['email']);
+
         return new Redirect('/');
     }
 }

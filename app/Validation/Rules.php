@@ -1,33 +1,17 @@
 <?php declare(strict_types=1);
 
-namespace App;
+namespace App\Validation;
 
-use App\FormRequests\UserLoginFormRequest;
-use App\FormRequests\UserRegistrationFormRequest;
+use App\Authentication;
+use App\Database;
 use Respect\Validation\Exceptions\ValidationException;
-use Respect\Validation\Validator as v;
+use Respect\Validation\Validator as validator;
 
-class Validation
+class Rules
 {
-    public function validateRegistrationForm(UserRegistrationFormRequest $request): void
+    protected function validateUserName(string $name): void
     {
-        $this->validateUserName($request->getName());
-        $this->validateEmail($request->getEmail());
-        $this->validateEmailExists($request->getEmail());
-        $this->validatePassword($request->getPassword());
-        $this->validateEqualPasswords($request->getPassword(), $request->getPasswordConfirm());
-    }
-
-    public function validateLoginForm(UserLoginFormRequest $request): void
-    {
-        $this->validateEmail($request->getEmail());
-        $this->validatePassword($request->getPassword());
-        $this->validateLoginCredentials($request->getEmail(), $request->getPassword());
-    }
-
-    private function validateUserName(string $name): void
-    {
-        $userNameValidator = v::alpha()->length(3, 15);
+        $userNameValidator = validator::alpha()->length(3, 15);
         try {
             $userNameValidator->check($name);
         } catch (ValidationException $exception) {
@@ -35,9 +19,9 @@ class Validation
         }
     }
 
-    private function validateEmail(string $email): void
+    protected function validateEmail(string $email): void
     {
-        $emailValidator = v::email();
+        $emailValidator = validator::email();
         try {
             $emailValidator->check($email);
         } catch (ValidationException $exception) {
@@ -45,7 +29,7 @@ class Validation
         }
     }
 
-    private function validateEmailExists(string $email): void
+    protected function validateEmailExists(string $email): void
     {
         $queryBuilder = Database::getConnection()->createQueryBuilder();
         $checkIfEmailExists = $queryBuilder
@@ -60,19 +44,19 @@ class Validation
         }
     }
 
-    private function validatePassword(string $password): void
+    protected function validatePassword(string $password, string $errorName = 'password'): void
     {
-        $passwordValidator = v::alnum()->length(5);
+        $passwordValidator = validator::alnum()->length(5);
         try {
             $passwordValidator->check($password);
         } catch (ValidationException $exception) {
-            $this->addError('password', $exception->getMessage());
+            $this->addError($errorName, $exception->getMessage());
         }
     }
 
-    private function validateEqualPasswords(string $firstPassword, string $secondPassword): void
+    protected function validateEqualPasswords(string $firstPassword, string $secondPassword): void
     {
-        $EqualPasswordValidator = v::identical($firstPassword);
+        $EqualPasswordValidator = validator::identical($firstPassword);
         try {
             $EqualPasswordValidator->check($secondPassword);
         } catch (ValidationException $exception) {
@@ -80,7 +64,14 @@ class Validation
         }
     }
 
-    private function validateLoginCredentials(string $email, string $password): void
+    protected function validateCurrentPassword(string $password): void
+    {
+        if (!password_verify($password, Authentication::getUser()->getPassword())) {
+            $this->addError('password', 'wrong password!');
+        }
+    }
+
+    protected function validateLoginCredentials(string $email, string $password): void
     {
         $queryBuilder = Database::getConnection()->createQueryBuilder();
         $user = $queryBuilder

@@ -8,7 +8,7 @@ class RegisterService
 {
     public function execute(RegisterServiceRequest $request): void
     {
-        $queryBuilder = (new Database())->getConnection()->createQueryBuilder();
+        $queryBuilder = Database::getConnection()->createQueryBuilder();
         $queryBuilder->insert('users')
             ->values([
                 'name' => '?',

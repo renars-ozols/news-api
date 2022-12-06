@@ -19,14 +19,15 @@ class AuthViewVariables implements ViewVariables
 
         $queryBuilder = Database::getConnection()->createQueryBuilder();
         $user = $queryBuilder
-            ->select('name')
+            ->select('name, email')
             ->from('users')
             ->where('id = ?')
             ->setParameter(0, $_SESSION['auth_id'])
             ->fetchAssociative();
 
         return [
-            'name' => $user['name']
+            'name' => $user['name'],
+            'email' => $user['email']
         ];
     }
 }
