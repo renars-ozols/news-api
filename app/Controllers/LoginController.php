@@ -23,7 +23,7 @@ class LoginController
             $_POST['password']
         ));
 
-        if (isset($_SESSION['errors']) && count($_SESSION['errors']) >= 1) {
+        if (isset($_SESSION['errors']) && count($_SESSION['errors']) > 0) {
             return new Redirect('/login');
         }
 

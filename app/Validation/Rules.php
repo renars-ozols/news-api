@@ -56,9 +56,9 @@ class Rules
 
     protected function validateEqualPasswords(string $firstPassword, string $secondPassword): void
     {
-        $EqualPasswordValidator = validator::identical($firstPassword);
+        $equalPasswordValidator = validator::identical($firstPassword);
         try {
-            $EqualPasswordValidator->check($secondPassword);
+            $equalPasswordValidator->check($secondPassword);
         } catch (ValidationException $exception) {
             $this->addError('passwordConfirm', $exception->getMessage());
         }
